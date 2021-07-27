@@ -1,5 +1,5 @@
-#ifndef _thpool_THPOOL_
-#define _thpool_THPOOL_
+#ifndef _THPOOL_
+#define _THPOOL_
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,4 +97,4 @@ void thpool_destroy(thpool_t pool);
 }
 #endif
 
-#endif /* _thpool_THPOOL_ */
+#endif /* _THPOOL_ */
