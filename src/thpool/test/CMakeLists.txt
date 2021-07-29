@@ -9,7 +9,12 @@ set(REQUIRED_SOURCES)
 #     list(APPEND REQUIRED_SOURCES ${PROJECT_SOURCE_DIR}/src/pthread_barrier.c)
 # endif()
 
-set(TEST_LIBRARIES thpool Threads::Threads)
+set(TEST_LIBRARIES Threads::Threads)
+if(BUILD_SHARED_LIBS)
+    list(APPEND TEST_LIBRARIES thpool_shared)
+else()
+    list(APPEND TEST_LIBRARIES thpool)
+endif()
 
 # Build tests
 add_executable(test_thpool

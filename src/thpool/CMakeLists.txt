@@ -7,6 +7,19 @@ set(
     thpool.c
 )
 
+include(GNUInstallDirs)
+
+add_library(thpool STATIC ${thpool_SOURCES})
+set_target_properties(thpool
+        PROPERTIES OUTPUT_NAME thpool
+                   POSITION_INDEPENDENT_CODE ON        
+)
+install(TARGETS thpool
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
 if(BUILD_SHARED_LIBS)
     add_library(thpool_shared SHARED ${thpool_SOURCES})
     set_target_properties(
@@ -15,16 +28,14 @@ if(BUILD_SHARED_LIBS)
                    POSITION_INDEPENDENT_CODE ON
                    SOVERSION "${THPOOL_VERSION_MAJOR}"
                    VERSION "${THPOOL_VERSION}")
+    
+    install(TARGETS thpool_shared
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
 endif()
-add_library(thpool STATIC ${thpool_SOURCES})
-set_target_properties(thpool PROPERTIES OUTPUT_NAME thpool)
 
-include(GNUInstallDirs)
-install(TARGETS thpool
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
 # Install headers
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/thpool"
         DESTINATION "include"

@@ -43,6 +43,8 @@ jobs:
       shell: bash
     - name: Build (Release)
       run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release
+    - name: Build (Release, Shared)
+      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
     - name: Build (Debug)
       run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
     - name: Build (Debug, ASAN)

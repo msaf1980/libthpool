@@ -125,7 +125,7 @@ task:
           - image: ubuntu:20.04
           - image: ubuntu:16.04
           - image: ubuntu:18.04
-    - name: Build (Debug)
+    - name: Build on FreeBSD (Debug)
       install_dependencies_script:
         - pkg install -y bash gmake cmake
       script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
