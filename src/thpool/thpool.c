@@ -59,13 +59,14 @@ static void* _thpool_worker(void* _pool);
 
 thpool_t thpool_create(int workers, int queue_size) {
 	int err, i;
+	thpool_t pool;
 
 	if (workers < 1) {
 		errno = EINVAL;
 		return NULL;
 	}
 	/* allocate new pool */
-	thpool_t pool = (thpool_t) malloc(sizeof(struct thpool)); 
+	pool = (thpool_t) malloc(sizeof(struct thpool)); 
 	if (pool == NULL)
 		goto ERROR_ERRNO;
 
