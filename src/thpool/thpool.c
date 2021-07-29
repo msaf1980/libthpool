@@ -61,7 +61,7 @@ thpool_t thpool_create(int workers, int queue_size) {
 	int err, i;
 	thpool_t pool;
 
-	if (workers < 1) {
+	if (workers < 1 || queue_size < 1) {
 		errno = EINVAL;
 		return NULL;
 	}
