@@ -1,3 +1,7 @@
+set(THPOOL_VERSION "0.0.1")
+
+set_version(THPOOL_VERSION THPOOL_VERSION_MAJOR THPOOL_VERSION_MINOR THPOOL_VERSION_PATCH THPOOL_VERSION_REVISION)
+
 set(
     thpool_SOURCES
     thpool.c
@@ -8,8 +12,8 @@ if(BUILD_SHARED_LIBS)
     set_target_properties(
         thpool_shared
         PROPERTIES OUTPUT_NAME thpool
-                   SOVERSION "${VERSION_MAJOR}"
-                   VERSION "${VERSION}")
+                   SOVERSION "${THPOOL_VERSION_MAJOR}"
+                   VERSION "${THPOOL_VERSION}")
 endif()
 add_library(thpool STATIC ${thpool_SOURCES})
 set_target_properties(thpool PROPERTIES OUTPUT_NAME thpool)
