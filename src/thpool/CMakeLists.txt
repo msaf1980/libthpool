@@ -12,6 +12,7 @@ if(BUILD_SHARED_LIBS)
     set_target_properties(
         thpool_shared
         PROPERTIES OUTPUT_NAME thpool
+                   POSITION_INDEPENDENT_CODE ON
                    SOVERSION "${THPOOL_VERSION_MAJOR}"
                    VERSION "${THPOOL_VERSION}")
 endif()
