@@ -72,9 +72,9 @@ task:
         - pip3 install git+https://github.com/msaf1980/cget@custom_buildtype
       debug_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
       release_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release
-      debug_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug
+      debug_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug -DENABLE_UBSAN=ON
       debug_tsan_script: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
-      release_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
+      release_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan -DENABLE_UBSAN=ON
       release_tsan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
       container:
         matrix:
@@ -87,9 +87,9 @@ task:
         - pip-3.8 install git+https://github.com/msaf1980/cget@custom_buildtype
       debug_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
       release_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release
-      debug_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug
+      debug_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug -DENABLE_UBSAN=ON
       debug_tsan_script: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
-      release_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
+      release_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan -DENABLE_UBSAN=ON
       release_tsan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
       freebsd_instance:
         matrix:
