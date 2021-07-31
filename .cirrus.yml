@@ -13,6 +13,7 @@ task:
         - pip3 install git+https://github.com/msaf1980/cget@custom_buildtype
       debug_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
       release_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release
+      release_shared_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
       container:
         matrix:
           - image: gcc:11
@@ -35,6 +36,7 @@ task:
         - pip3 install git+https://github.com/msaf1980/cget@custom_buildtype
       debug_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug -DBUILD_DEPS=static
       release_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DBUILD_DEPS=static
+      release_shared_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
       container:
         matrix:
           - image: gcc:6
@@ -50,6 +52,7 @@ task:
         - pip3 install git+https://github.com/msaf1980/cget@custom_buildtype
       debug_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
       release_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+      release_shared_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
       container:
         matrix:
           - image: silkeh/clang:11
@@ -63,7 +66,7 @@ task:
     - name: Build (gcc)
       env:
         LC_ALL: C.UTF-8
-        LANG: C.UTF-8    
+        LANG: C.UTF-8
       install_dependencies_script:
         - echo 'APT::Get::AllowUnauthenticated true;' > /etc/apt/apt.conf.d/disable-gpg.conf
         - echo 'Acquire::AllowInsecureRepositories true;' >> /etc/apt/apt.conf.d/disable-gpg.conf
@@ -72,6 +75,7 @@ task:
         - pip3 install git+https://github.com/msaf1980/cget@custom_buildtype
       debug_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
       release_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release
+      release_shared_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
       debug_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug -DENABLE_UBSAN=ON
       debug_tsan_script: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
       release_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan -DENABLE_UBSAN=ON
@@ -87,6 +91,7 @@ task:
         - pip-3.8 install git+https://github.com/msaf1980/cget@custom_buildtype
       debug_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
       release_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release
+      release_shared_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
       debug_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug -DENABLE_UBSAN=ON
       debug_tsan_script: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
       release_asan_script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan -DENABLE_UBSAN=ON
