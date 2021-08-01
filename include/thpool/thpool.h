@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <unistd.h>
+
 /**
  * @file
 *
@@ -26,13 +28,13 @@ typedef struct thpool* thpool_t;
  * @retval                   Returns a pointer to an initialised threadpool on
  *                           success or NULL on error (error code stored in errno).
  */
-thpool_t thpool_create(int workers, int queue_size);
+thpool_t thpool_create(size_t workers, size_t queue_size);
 
 /**
  * @brief  Count of workers thpool in thread poool
  * @param  pool            Threadpool
  */
-long thpool_workers_count(thpool_t pool);
+size_t thpool_workers_count(thpool_t pool);
 
 /**
  * @brief   Add a task to a thread pool (no memory allocation, task reused from static queue)
@@ -42,6 +44,17 @@ long thpool_workers_count(thpool_t pool);
  * @retval					Returns 0 on success and -1 on error.
  */
 int thpool_add_task(thpool_t pool, void (*function)(void *), void* arg);
+
+/**
+ * @brief   Add a task to a thread pool (no memory allocation, task reused from static queue)
+ * @param	pool      Threadpool to add task to.
+ * @param	function  Function/task for worker to execute.
+ * @param	arg		  Arguments to function/task.
+ * @param   usec      Sleep (millisec).
+ * @param   max_try   Try count (if queue is full).
+ * @retval			  Returns 0 on success, -1 or QERR_* on error.
+ */
+int thpool_add_task_try(thpool_t pool, void (*function)(void *), void* arg, useconds_t usec, int max_try);
 
 /**
  * @brief  Pause tasks process in thread poool
@@ -59,13 +72,13 @@ void thpool_resume(thpool_t pool);
  * @brief  Count of active tasks (thpool in thread poool, that processing task)
  * @param  pool            Threadpool
  */
-int thpool_active_tasks(thpool_t pool);
+size_t thpool_active_tasks(thpool_t pool);
 
 /**
  * @brief  Total count of tasks (queued and active)
  * @param  pool            Threadpool
  */
-int thpool_total_tasks(thpool_t pool);
+size_t thpool_total_tasks(thpool_t pool);
 
 /**
  * @brief  Wait for process all tasks in thread poool

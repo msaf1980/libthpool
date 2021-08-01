@@ -13,21 +13,21 @@ static void sleep_1(void* p) {
 	usleep(10);
 }
 
-static void wait_jobs(int num_jobs, int num_thpool, int wait_each_job) {
+static void wait_jobs(size_t num_jobs, size_t num_thpool, int wait_each_job) {
 	thpool_t pool = thpool_create(num_thpool, num_jobs);
 
-	int i;
+	size_t i;
 	int n = 0;
 	for (i = 0; i < num_jobs; i++){
 		thpool_add_task(pool, sleep_1, &n);
 		if (wait_each_job) {
 			thpool_wait(pool);
-			ASSERT_EQUAL(i+1, __atomic_add_fetch(&n, 0, __ATOMIC_RELAXED));
+			ASSERT_EQUAL((ssize_t) i+1, __atomic_add_fetch(&n, 0, __ATOMIC_RELAXED));
 		}
 	}
 	if (!wait_each_job) {
 		thpool_wait(pool);
-		ASSERT_EQUAL(num_jobs, __atomic_add_fetch(&n, 0, __ATOMIC_RELAXED));
+		ASSERT_EQUAL((ssize_t) num_jobs, __atomic_add_fetch(&n, 0, __ATOMIC_RELAXED));
 	}
 
 	thpool_destroy(pool);

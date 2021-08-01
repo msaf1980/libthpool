@@ -10,9 +10,13 @@
 
 #include <thpool/thpool.h>
 
+#include <pthread.h>
+#if NO_PTHREAD_BARRIER
+#include "pthread_barrier.h"
+#endif
+
 size_t LOOP_COUNT = 10000000;
 
-size_t v = 0;
 int ret = 0;
 
 static void task(void *arg) {
@@ -33,34 +37,76 @@ static uint64_t getCurrentTime(void) {
     return now64;
 }
 
-void bench(size_t loop_count, int thpool) {
+struct task_param {
+	size_t n;
+	size_t loop_count;
+	thpool_t pool;
+	pthread_barrier_t start_barrier;
+};
+
+static void *add_task_thread(void *p){
+	size_t i;
+	struct task_param *param = (struct task_param *) p;
+	pthread_barrier_wait(&param->start_barrier);
+	for (i = 0; i < param->loop_count; i++) {
+		thpool_add_task_try(param->pool, task, &param->n, 1, 100);
+	}
+	return NULL;
+}
+
+void bench(size_t writers, size_t readers, size_t loop_count) {
 	size_t i;
 	uint64_t start, end, duration;
-	thpool_t pool;
-	v = 0;
-	pool = thpool_create(thpool, (int) LOOP_COUNT);
+	struct task_param param;
+	int perr;
+    pthread_attr_t thr_attr;
+    pthread_t *t_handles;
+	size_t queue_size;
 
+	if (loop_count > 40000000) {
+		queue_size = 40000000;
+	} else {
+		queue_size = loop_count;
+	}
+
+	param.n = 0;
+	param.loop_count = loop_count;
+	param.pool = thpool_create(readers, queue_size);
+
+	pthread_barrier_init(&param.start_barrier, NULL, (unsigned int) writers + 1);
+
+	t_handles = (pthread_t *) malloc((size_t) writers * sizeof(pthread_t));
+	for (i = 0; i < (size_t) writers; i++) {
+		perr = pthread_create(&t_handles[i], &thr_attr, add_task_thread, &param);
+        if (perr) {
+			fprintf(stderr, "%s\n", strerror(perr));
+			exit(1);
+		}
+	}
+
+	pthread_barrier_wait(&param.start_barrier);
 	start = getCurrentTime();
-	
-	for (i = 0; i < loop_count; i++) {
-		thpool_add_task(pool, task, (void *)&v);
-	};
-	thpool_wait(pool);
 
+	for (i = 0; i < (size_t) writers; i++) {
+		pthread_join(t_handles[i], NULL);
+	}
+
+	thpool_wait(param.pool);
+	
 	end = getCurrentTime();
 
-	thpool_destroy(pool);
+	thpool_destroy(param.pool);
 	duration = end - start;
-	if (v != loop_count) {
+	if (param.n != loop_count * (size_t) writers) {
 		ret++;	
 	}
-	printf("%d thpool (%f ms, %lu iterations, %llu ns/op, %llu op/s) [%s]\n",
-		thpool,
+	printf("thpool, %llu threads pool, %llu writers (%f ms, %lu iterations, %llu ns/op, %llu op/s) [%s]\n",
+		(unsigned long long) readers, (unsigned long long) writers,
 		((double) end - (double) start) / 1000,
 		(unsigned long) loop_count,
 		(unsigned long long) duration * 1000 / loop_count,
 		(unsigned long long) 1000000 * loop_count / duration,			
-		v == loop_count ? "OK" : "ERR");
+		param.n != loop_count * (size_t) writers ? "OK" : "ERR");
 }
 
 int main() {
@@ -71,6 +117,7 @@ int main() {
 			LOOP_COUNT = c;
 		}
 	}
-	bench(LOOP_COUNT, 4);
+	bench(1, 4, LOOP_COUNT);
+	bench(4, 4, LOOP_COUNT);
 	return ret;
 }

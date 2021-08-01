@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 
-option(BUILD_TEST "Build tests" ON)
-option(PROFILE "Profile with google perftools" OFF)
-
 include (CheckFunctionExists)
 include (CheckIncludeFiles)
 include (CheckSymbolExists)
@@ -23,7 +20,7 @@ foreach(cmakeFile ${cmakeFiles})
     include(${cmakeFile})
 endforeach(cmakeFile)
 
-if (BUILD_TEST)
+if(BUILD_TESTING)
     include(CTest)
 endif()
 

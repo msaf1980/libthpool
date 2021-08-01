@@ -36,19 +36,19 @@ typedef struct task {
  */
 struct thpool {
 	int shutdown;
-	int running_count;
 	int hold; /* hold task queue */
+	size_t running_count;	
 	pthread_mutex_t lock;  /* lock for enqueue/dequeue task */
 	pthread_cond_t notify; /* notify for enqueue task */
 	pthread_cond_t notify_empty;   /* notify for end tasks processing */
 	pthread_mutex_t lock_resize;  /* lock for resize workers */
 	pthread_t *thpool; /* thpool */
-	volatile int thread_count;
+	volatile size_t thread_count;
 	task_t *task_queue;    /* task queue */
-	int queue_size;
-	volatile int queue_count;
-	int head;
-	int tail;
+	size_t queue_size;
+	volatile size_t queue_count;
+	size_t head;
+	size_t tail;
 };
 
 /* ========================== THREADPOOL ============================ */
@@ -57,8 +57,9 @@ static void* _thpool_worker(void* _pool);
 
 /* ========================== THREADPOOL ============================ */
 
-thpool_t thpool_create(int workers, int queue_size) {
-	int err, i;
+thpool_t thpool_create(size_t workers, size_t queue_size) {
+	int err;
+	size_t i;
 	thpool_t pool;
 
 	if (workers < 1 || queue_size < 1) {
@@ -125,8 +126,8 @@ ERROR:
 	return NULL;
 }
 
-long thpool_workers_count(thpool_t pool) {
-	long thread_count;
+size_t thpool_workers_count(thpool_t pool) {
+	size_t thread_count;
 	pthread_mutex_lock(&(pool->lock));
 	thread_count = pool->thread_count;
 	pthread_mutex_unlock(&(pool->lock));
@@ -158,6 +159,36 @@ int thpool_add_task(thpool_t pool, void (*function)(void *), void* arg) {
 	return 0;
 }
 
+int thpool_add_task_try(thpool_t pool, void (*function)(void *), void* arg, useconds_t usec, int max_try) {
+	/* set up task */
+	task_t task;
+	task.function = function;
+	task.arg = arg;
+
+	for (; ; max_try--) {
+		if (max_try < 0) {
+			errno = EAGAIN;
+			return -1;
+		}
+		pthread_mutex_lock(&(pool->lock)); /* enter critical section */
+		if (pool->queue_count == pool->queue_size) {
+			pthread_mutex_unlock(&(pool->lock)); /* release lock */
+			sched_yield();
+			usleep(usec);
+		} else {
+			pool->task_queue[pool->tail] = task; /* add task to end of queue */
+			pool->tail = (pool->tail + 1) % pool->queue_size; /* advance end of queue */
+			pool->queue_count++; /* job added to queue */
+
+			pthread_cond_signal(&(pool->notify)); /* notify waiting workers of new job */
+			pthread_mutex_unlock(&(pool->lock)); /* end critical section */
+			break;
+		}
+	}
+
+	return 0;
+}
+
 void thpool_pause(thpool_t pool) {
 	__atomic_store_n(&(pool->hold), 1, __ATOMIC_RELEASE);
 }
@@ -169,12 +200,12 @@ void thpool_resume(thpool_t pool) {
 	pthread_mutex_unlock(&(pool->lock));
 }
 
-int thpool_active_tasks(thpool_t pool) {
+size_t thpool_active_tasks(thpool_t pool) {
 	return __atomic_add_fetch(&pool->running_count, 0, __ATOMIC_RELAXED);
 }
 
-int thpool_total_tasks(thpool_t pool) {
-	int count;
+size_t thpool_total_tasks(thpool_t pool) {
+	size_t count;
 
 	pthread_mutex_lock(&(pool->lock));
 	count = __atomic_add_fetch(&pool->running_count, 0, __ATOMIC_RELAXED) + pool->queue_count;
@@ -184,7 +215,7 @@ int thpool_total_tasks(thpool_t pool) {
 }
 
 void thpool_wait(thpool_t pool) {
-	int queue_count, active_count;
+	size_t queue_count, active_count;
 	while (1) {		
 		pthread_mutex_lock(&(pool->lock));
 		queue_count = pool->queue_count;
@@ -199,7 +230,7 @@ void thpool_wait(thpool_t pool) {
 }
 
 void thpool_shutdown(thpool_t pool) {
-	int i;
+	size_t i;
 	__atomic_store_n(&pool->shutdown, 1, __ATOMIC_RELEASE);
 	pthread_mutex_lock(&(pool->lock));
 	pthread_cond_broadcast(&(pool->notify));
