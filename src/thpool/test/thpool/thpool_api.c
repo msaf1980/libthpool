@@ -75,7 +75,7 @@ static void *add_task_thread(void *p){
 	size_t i;
 	struct task_param *param = (struct task_param *) p;
 	for (i = 0; i < LOOP_COUNT; i++) {
-		thpool_add_task_try(param->pool, increment_job, &param->n, 10, 100);
+		thpool_add_task_try(param->pool, increment_job, &param->n, 10, 1000);
 	}
 	return NULL;
 }

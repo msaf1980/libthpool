@@ -19,6 +19,8 @@ CTEST(thpool_worker, try_once) {
 	thpool_t pool = thpool_create(num_thpool, jobs);
 	
 	thpool_pause(pool);
+
+	usleep(300);
 	
 	/* Since pool is paused, thpool should not start before main's sleep */
 	for (i = 0; i < jobs; i++) {
